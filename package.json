@@ -1,0 +1,25 @@
+{
+  "name": "product-catalog-client",
+  "version": "0.1.0",
+  "description": "Shared product catalogue client: types, data fetch, image URL helpers, and the embroidery preview component. Consumed by Spreadshirt embroidery prototypes (Next + CRA).",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "typescript": "^5.4.5"
+  }
+}
