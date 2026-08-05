@@ -51,6 +51,23 @@ export type StaticProductDetails = {
     sizeFitHint: string
 }
 
+/**
+ * One body measurement of one size, as published by Spreadshirt. `name` is the
+ * letter keyed to the garment diagram the shop shows beside the size table
+ * (A/B/C — see SIZE_MEASURE_LABELS). Always millimetres; use formatMeasure to
+ * render.
+ */
+export type StaticSizeMeasure = {
+    name: string
+    mm: number
+}
+
+/** Measurements for a single size. `measures` is empty when none are published. */
+export type StaticSizeEntry = {
+    name: string
+    measures: StaticSizeMeasure[]
+}
+
 export type StaticProduct = {
     id: string
     name: string
@@ -61,6 +78,13 @@ export type StaticProduct = {
     appearances: StaticAppearance[]
     views: StaticView[]
     sizes: string[]
+    /**
+     * Per-size body measurements for the size guide, in the same order as
+     * `sizes`. Empty (or absent, on catalogues generated before this field
+     * existed) when the product publishes no measurements — render the guide
+     * without a table in that case rather than showing zeroes.
+     */
+    sizeGuide?: StaticSizeEntry[]
     printAreas: StaticPrintArea[]
     details: StaticProductDetails
 }
@@ -94,6 +118,8 @@ export type ProductTypeData = {
     views: StaticView[]
     printAreas: StaticPrintArea[]
     sizes: { id: string; name: string }[]
+    /** Per-size measurements for the size guide; empty when none published. */
+    sizeGuide: StaticSizeEntry[]
     details: StaticProductDetails
 }
 

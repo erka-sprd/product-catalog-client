@@ -19,7 +19,7 @@ export function getCatalog(baseUrl) {
 }
 // ---- Derivations (operate on the fetched products array) -------------------
 export function getProductType(products, id) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     const p = products.find(x => x.id === id);
     if (!p)
         return null;
@@ -37,8 +37,43 @@ export function getProductType(products, id) {
         views: p.views,
         printAreas: p.printAreas,
         sizes: p.sizes.map((name, i) => ({ id: String(i), name })),
+        sizeGuide: (_f = p.sizeGuide) !== null && _f !== void 0 ? _f : [],
         details: p.details,
     };
+}
+// ---- Size guide ------------------------------------------------------------
+/**
+ * What each measurement letter means, keyed to the garment diagram Spreadshirt
+ * publishes next to the table. Mirrors create-omat's
+ * `product-details.size-chart.guide.size-in.*` (translations/en-GB.json), where
+ * A and C are both lengths measured at different points.
+ */
+export const SIZE_MEASURE_LABELS = {
+    A: "Length",
+    B: "Width",
+    C: "Length",
+};
+/**
+ * Format a millimetre measurement for display — the same rounding create-omat
+ * uses (`getLocalizedSize` in src/utils/Units.ts): one decimal for cm, two for
+ * inches. Returns the number only; render the unit from the column header.
+ */
+export function formatMeasure(mm, unit = "cm") {
+    return unit === "in" ? (mm / 25.4).toFixed(2) : (mm / 10).toFixed(1);
+}
+/**
+ * The measurement letters this product publishes, in A→B→C order, taken from
+ * the first size that has any. Use it for table columns so every row lines up.
+ */
+export function sizeMeasureColumns(sizeGuide) {
+    const first = (sizeGuide !== null && sizeGuide !== void 0 ? sizeGuide : []).find(s => s.measures.length > 0);
+    return first ? first.measures.map(m => m.name) : [];
+}
+/** Look up one size's measurement by letter; null when not published. */
+export function sizeMeasure(sizeGuide, sizeName, measureName) {
+    var _a, _b;
+    const size = (sizeGuide !== null && sizeGuide !== void 0 ? sizeGuide : []).find(s => s.name === sizeName);
+    return (_b = (_a = size === null || size === void 0 ? void 0 : size.measures.find(m => m.name === measureName)) === null || _a === void 0 ? void 0 : _a.mm) !== null && _b !== void 0 ? _b : null;
 }
 /** Print-area overlay rectangle (percentages of the canvas) for a view. */
 export function getPrintAreaOverlay(product, viewId) {

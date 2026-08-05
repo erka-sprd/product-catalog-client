@@ -3,6 +3,7 @@ import type {
     ProductTileData,
     ProductTypeData,
     StaticProduct,
+    StaticSizeEntry,
 } from "./types"
 
 // ---- Fetching --------------------------------------------------------------
@@ -46,8 +47,51 @@ export function getProductType(products: StaticProduct[], id: string): ProductTy
         views: p.views,
         printAreas: p.printAreas,
         sizes: p.sizes.map((name, i) => ({ id: String(i), name })),
+        sizeGuide: p.sizeGuide ?? [],
         details: p.details,
     }
+}
+
+// ---- Size guide ------------------------------------------------------------
+
+/**
+ * What each measurement letter means, keyed to the garment diagram Spreadshirt
+ * publishes next to the table. Mirrors create-omat's
+ * `product-details.size-chart.guide.size-in.*` (translations/en-GB.json), where
+ * A and C are both lengths measured at different points.
+ */
+export const SIZE_MEASURE_LABELS: Record<string, string> = {
+    A: "Length",
+    B: "Width",
+    C: "Length",
+}
+
+/**
+ * Format a millimetre measurement for display — the same rounding create-omat
+ * uses (`getLocalizedSize` in src/utils/Units.ts): one decimal for cm, two for
+ * inches. Returns the number only; render the unit from the column header.
+ */
+export function formatMeasure(mm: number, unit: "cm" | "in" = "cm"): string {
+    return unit === "in" ? (mm / 25.4).toFixed(2) : (mm / 10).toFixed(1)
+}
+
+/**
+ * The measurement letters this product publishes, in A→B→C order, taken from
+ * the first size that has any. Use it for table columns so every row lines up.
+ */
+export function sizeMeasureColumns(sizeGuide: StaticSizeEntry[] | undefined): string[] {
+    const first = (sizeGuide ?? []).find(s => s.measures.length > 0)
+    return first ? first.measures.map(m => m.name) : []
+}
+
+/** Look up one size's measurement by letter; null when not published. */
+export function sizeMeasure(
+    sizeGuide: StaticSizeEntry[] | undefined,
+    sizeName: string,
+    measureName: string
+): number | null {
+    const size = (sizeGuide ?? []).find(s => s.name === sizeName)
+    return size?.measures.find(m => m.name === measureName)?.mm ?? null
 }
 
 /** Print-area overlay rectangle (percentages of the canvas) for a view. */
