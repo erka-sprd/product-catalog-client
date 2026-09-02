@@ -124,14 +124,28 @@ function hash(s: string): number {
     return h >>> 0
 }
 
-/** Deterministic pseudo out-of-stock map per (productId, appearanceId). */
+/**
+ * Out-of-stock sizes per (productId, appearanceId).
+ *
+ * A colour that publishes `outOfStock` in the catalogue is taken at its word —
+ * that is real modelled stock. Every other colour keeps the deterministic
+ * pseudo-random set, so the prototypes still show a plausible spread without
+ * the data having to describe the whole assortment.
+ */
 export function buildOutOfStockMap(
     productId: string,
-    appearances: { id: string }[],
+    appearances: { id: string; outOfStock?: string[] }[],
     sizes: { name: string }[]
 ): Record<string, string[]> {
     const map: Record<string, string[]> = {}
     for (const a of appearances) {
+        if (a.outOfStock) {
+            // Only sizes this product actually has — a stale entry must not
+            // strike a size that isn't on the rail.
+            const named = new Set(sizes.map(s => s.name))
+            map[a.id] = a.outOfStock.filter(name => named.has(name))
+            continue
+        }
         const seed = hash(`${productId}:${a.id}`)
         const count = seed % 3
         const picks = new Set<string>()

@@ -32,9 +32,17 @@ export declare function getPrintAreaOverlay(product: ProductTypeData, viewId: st
     width: number;
     height: number;
 } | null;
-/** Deterministic pseudo out-of-stock map per (productId, appearanceId). */
+/**
+ * Out-of-stock sizes per (productId, appearanceId).
+ *
+ * A colour that publishes `outOfStock` in the catalogue is taken at its word —
+ * that is real modelled stock. Every other colour keeps the deterministic
+ * pseudo-random set, so the prototypes still show a plausible spread without
+ * the data having to describe the whole assortment.
+ */
 export declare function buildOutOfStockMap(productId: string, appearances: {
     id: string;
+    outOfStock?: string[];
 }[], sizes: {
     name: string;
 }[]): Record<string, string[]>;

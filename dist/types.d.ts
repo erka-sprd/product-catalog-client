@@ -39,6 +39,12 @@ export type StaticAppearance = {
     modelImage: string | null;
     printTypes: StaticPrintType[];
     views: StaticAppearanceView[];
+    /**
+     * Sizes unavailable in this colour, by size name ("XL"). Published by the
+     * catalogue for the colours whose stock is modelled deliberately; where it
+     * is absent buildOutOfStockMap invents a plausible set instead.
+     */
+    outOfStock?: string[];
 };
 export type StaticPrintArea = {
     id: string;
