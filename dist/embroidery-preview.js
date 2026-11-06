@@ -1,9 +1,11 @@
 "use client";
 import { jsx as _jsx } from "react/jsx-runtime";
-// renderEmbroidery turns a flat design ImageData into a stitched/embossed
-// embroidery look on a canvas; EmbroideryPreview wraps it for an image src.
-// Dependency-free except React, so it runs in both Next and CRA.
+// EmbroideryPreview turns an image src into a stitched embroidery look on a
+// canvas. The look is rendered by the shader in embroidery-gl.ts; the JS
+// renderer below (renderEmbroidery) is kept as the fallback for a browser
+// without WebGL. Dependency-free except React, so it runs in both Next and CRA.
 import { useEffect, useRef } from "react";
+import { embroideryGlSupported, renderEmbroideryGl } from "./embroidery-gl";
 const SETTINGS = {
     quantStep: 1,
     stitchDensity: 8,
@@ -257,10 +259,16 @@ export function EmbroideryPreview({ src, maxSize = 500, style, className, onRend
             offscreen.height = h;
             const octx = offscreen.getContext("2d", { willReadFrequently: true });
             octx.drawImage(img, 0, 0, w, h);
-            const base = octx.getImageData(0, 0, w, h);
-            const quantized = quantizeImageData(base, SETTINGS.quantStep);
-            octx.putImageData(quantized, 0, 0);
-            const result = renderEmbroidery(quantized, w, h);
+            let result;
+            if (embroideryGlSupported()) {
+                result = renderEmbroideryGl(offscreen, w, h);
+            }
+            else {
+                const base = octx.getImageData(0, 0, w, h);
+                const quantized = quantizeImageData(base, SETTINGS.quantStep);
+                octx.putImageData(quantized, 0, 0);
+                result = renderEmbroidery(quantized, w, h);
+            }
             ctx.drawImage(result, 0, 0);
             (_a = onRenderedRef.current) === null || _a === void 0 ? void 0 : _a.call(onRenderedRef, canvas.toDataURL("image/png"));
         };
